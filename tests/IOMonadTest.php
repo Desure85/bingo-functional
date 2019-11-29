@@ -6,7 +6,7 @@ use Chemem\Bingo\Functional\Functors\Monads\IO;
 
 use function Chemem\Bingo\Functional\Algorithms\concat;
 use function Chemem\Bingo\Functional\Algorithms\identity;
-use function Chemem\Bingo\Functional\Algorithms\reduce;
+use function Chemem\Bingo\Functional\Algorithms\{reduce, toException};
 use function Chemem\Bingo\Functional\Functors\Monads\IO\IO;
 use function Chemem\Bingo\Functional\Functors\Monads\IO\putChar;
 use function Chemem\Bingo\Functional\Functors\Monads\IO\putStr;

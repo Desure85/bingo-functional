@@ -17,8 +17,8 @@ function extend(array ...$lists): array
 {
     $ret = [];
 
-    foreach ($lists as $list) {
-        foreach ($list as $key => $val) {
+    for ($idx = 0; $idx < count($lists); $idx++) {
+        foreach ($lists[$idx] as $key => $val) {
             if (is_string($key)) {
                 $ret[$key] = $val;
             } else {

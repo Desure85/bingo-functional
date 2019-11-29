@@ -9,21 +9,16 @@
 
 namespace Chemem\Bingo\Functional\Functors\Monads;
 
-use function Chemem\Bingo\Functional\Algorithms\compose;
-use function Chemem\Bingo\Functional\Algorithms\extend;
-use function Chemem\Bingo\Functional\Algorithms\flatten;
-use function Chemem\Bingo\Functional\Algorithms\fold;
-use function Chemem\Bingo\Functional\Algorithms\mapDeep;
-use function Chemem\Bingo\Functional\Algorithms\partialLeft;
+use \Chemem\Bingo\Functional\Algorithms as f;
 
 class ListMonad implements Monadic
 {
-    const of = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\ListMonad::of';
+    const of = __CLASS__ . '::of';
 
     /**
      * @var array The collection to transform
      */
-    private $collection;
+    private array $collection;
 
     /**
      * ListMonad constructor.
@@ -59,22 +54,13 @@ class ListMonad implements Monadic
         $list = $this->extract();
 
         $result = compose(
-            partialLeft(\Chemem\Bingo\Functional\Algorithms\filter, function ($val) {
-                return is_callable($val);
-            }),
-            partialLeft(
-                \Chemem\Bingo\Functional\Algorithms\map,
-                function ($func) use ($list) {
-                    $app = function (array $acc = []) use ($func, $list) {
-                        return mapDeep($func, $list);
-                    };
+            partialLeft(f\filter, 'is_callable'),
+            partialLeft(f\map, function ($func) use ($list) {
+                $app = fn(array $acc = []) => f\mapDeep($func, $list);
 
-                    return $app();
-                }
-            ),
-            function ($result) use ($list) {
-                return extend($list, ...$result);
-            }
+                return $app();
+            }),
+            fn($result) => f\extend($list, ...$result)
         );
 
         return new static($result($app->extract()));
@@ -89,22 +75,16 @@ class ListMonad implements Monadic
      */
     public function bind(callable $function): Monadic
     {
-        $concat = compose(
-            function (array $list) use ($function) {
-                return fold(
-                    function ($acc, $item) use ($function) {
-                        $acc[] = $function($item)->extract();
+        $concat = f\compose(
+            fn(array $list) => f\fold(function ($acc, $item) use ($function) {
+                $acc[] = $function($item)->extract();
 
-                        return $acc;
-                    },
-                    $list,
-                    []
-                );
-            },
-            partialLeft('array_merge', $this->collection)
+                return $acc;
+            }, $list, []),
+            f\partial('array_merge', $this->collection)
         );
 
-        return self::of(flatten($concat($this->collection)));
+        return self::of(f\flatten($concat($this->collection)));
     }
 
     /**
@@ -116,9 +96,7 @@ class ListMonad implements Monadic
      */
     public function map(callable $function): Monadic
     {
-        return $this->bind(function ($list) use ($function) {
-            return self::of($function($list));
-        });
+        return $this->bind(fn($list) => self::of($function($list)));
     }
 
     /**
@@ -142,6 +120,6 @@ class ListMonad implements Monadic
      */
     public function extract(): array
     {
-        return flatten($this->collection);
+        return f\flatten($this->collection);
     }
 }

@@ -82,9 +82,7 @@ const putStr = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\IO\\putStr';
 
 function putStr(string $str): IOMonad
 {
-    return IO(function () use ($str): int {
-        return fputs(STDIN, $str);
-    });
+    return IO(fn() => fputs(STDIN, $str));
 }
 
 /**
@@ -155,9 +153,7 @@ const _print = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\IO\\_print';
 function _print(IOMonad $interaction): IOMonad
 {
     return $interaction
-        ->map(function (string $result) {
-            return printf('%s', A\concat(PHP_EOL, $result, A\identity('')));
-        });
+        ->map(fn($result): int => printf('%s', A\concat(PHP_EOL, $result, '')));
 }
 
 /**
@@ -173,10 +169,8 @@ const IOException = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\IO\\IOExceptio
 
 function IOException(string $message): IOMonad
 {
-    return IO(function () use ($message) {
-        return function () use ($message) {
-            throw new IOException($message);
-        };
+    return IO(fn(): callable => function () use ($message) {
+        throw new IOException($message);
     });
 }
 
@@ -197,8 +191,6 @@ function catchIO(IOMonad $operation): IOMonad
         $exception = A\compose(A\toException, IO);
         return is_callable($operation) ?
             $exception($operation) :
-            $exception(function () use ($operation) {
-                return $operation;
-            });
+            $exception(fn() => $operation);
     });
 }

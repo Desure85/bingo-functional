@@ -19,7 +19,5 @@ function zipWith(callable $function, array ...$values): array
 {
     $zipped = zip(...$values);
 
-    return map(function ($zip) use ($function) {
-        return $function(...$zip);
-    }, $zipped);
+    return map(fn($zip) => $function(...$zip), $zipped);
 }

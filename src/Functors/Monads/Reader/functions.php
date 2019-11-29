@@ -97,7 +97,5 @@ const ask = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\Reader\\ask';
 
 function ask(): ReaderMonad
 {
-    return ReaderMonad::of(function ($value) {
-        return $value;
-    });
+    return ReaderMonad::of(fn($val) => $val);
 }

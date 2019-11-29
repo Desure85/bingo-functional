@@ -28,9 +28,7 @@ const state = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\State\\state';
 
 function state(callable $action): StateMonad
 {
-    return StateMonad::of(function ($state) use ($action) {
-        return $action($state);
-    });
+    return StateMonad::of(fn($state) => $action($state));
 }
 
 /**
@@ -47,9 +45,7 @@ const put = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\State\\put';
 
 function put($value): StateMonad
 {
-    return state(function ($state) use ($value) {
-        return $value;
-    });
+    return state(fn($_) => $value);
 }
 
 /**
@@ -64,9 +60,7 @@ const get = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\State\\get';
 
 function get(): StateMonad
 {
-    return state(function ($state) {
-        return [$state, $state];
-    });
+    return state(fn($state): array => [$state, $state]);
 }
 
 /**
@@ -81,9 +75,7 @@ function get(): StateMonad
  */
 function gets(callable $projection): StateMonad
 {
-    return state(function ($state) use ($projection) {
-        return [$projection($state), $state];
-    });
+    return state(fn($state): array => [$projection($state), $state]);
 }
 
 /**
@@ -100,9 +92,7 @@ const modify = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\State\\modify';
 
 function modify(callable $function): StateMonad
 {
-    return StateMonad::of(function ($state) use ($function) {
-        return [null, $function($state)];
-    });
+    return StateMonad::of(fn($state): array => [null, $function($state)]);
 }
 
 /**

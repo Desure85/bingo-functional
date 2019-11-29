@@ -16,9 +16,7 @@ const toPairs = 'Chemem\\Bingo\\Functional\\Algorithms\\toPairs';
 function toPairs(array $collection): array
 {
     $pairs = array_map(
-        function ($key, $val) {
-            return [$key, $val];
-        },
+        fn($key, $val) => [$key, $val],
         array_keys($collection),
         array_values($collection)
     );

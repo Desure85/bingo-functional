@@ -32,9 +32,7 @@ const readFile = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\IO\\readFile';
 function readFile(string $filePath): IOMonad
 {
     return IO($filePath)
-        ->map(function (string $file) {
-            return is_file($file) ? @file_get_contents($file) : identity('');
-        });
+        ->map(fn($file): string => is_file($file) ? @file_get_contents($file) : identity(''));
 }
 
 /**
@@ -53,9 +51,7 @@ const writeFile = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\IO\\writeFile';
 function writeFile(string $filePath, string $content): IOMonad
 {
     return IO($filePath)
-        ->map(function (string $file) use ($content) {
-            return is_file($file) ? @file_put_contents($file, $content) : identity(false);
-        });
+        ->map(fn(string $file): int => is_file($file) ? @file_put_contents($file, $content) : false);
 }
 
 /**
@@ -74,9 +70,7 @@ const appendFile = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\IO\\appendFile'
 function appendFile(string $filePath, string $content): IOMonad
 {
     return IO($filePath)
-        ->map(function (string $file) use ($content) {
-            return is_file($file) ? @file_put_contents($file, $content, \FILE_APPEND) : identity(false);
-        });
+        ->map(fn(string $file): int => is_file($file) ? @file_put_contents($file, $content, \FILE_APPEND) : false);
 }
 
 /**
@@ -96,7 +90,5 @@ const readIO = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\IO\\readIO';
 function readIO(IOMonad $getStr): IOMonad
 {
     return $getStr
-        ->map(function (string $input) {
-            return toException(constantFunction($input))();
-        });
+        ->map(fn(string $input) => toException(constantFunction($input))());
 }

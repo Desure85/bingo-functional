@@ -17,11 +17,7 @@ function any(array $collection, callable $func): bool
 {
     $evalAny = compose(
         partialLeft(filter, $func),
-        function (array $result) {
-            $resCount = count($result);
-
-            return $resCount >= 1;
-        }
+        fn(array $result): bool => count($result) >= 1
     );
 
     return $evalAny($collection);

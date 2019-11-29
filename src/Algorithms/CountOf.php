@@ -17,10 +17,11 @@ const countOfValue = __NAMESPACE__ . '\\countOfValue';
 function countOfValue(array $list, $value): int
 {
     $count = 0;
-    foreach ($list as $val) {
+    for ($idx = 0; $idx < count($list); $idx++) {
+        $val = $list[$idx];
         $count += is_array($val) ?
             countOfValue($val, $value) :
-            $val == $value ? 1 : 0;
+            ($val == $value ? 1 : 0);
     }
 
     return $count;
@@ -44,7 +45,7 @@ function countOfKey(array $list, string $skey): int
     foreach ($list as $key => $val) {
         $count += is_array($val) ?
             countOfKey($val, $skey) :
-            $key == $skey ? 1 : 0;
+            ($key == $skey ? 1 : 0);
     }
 
     return $count;

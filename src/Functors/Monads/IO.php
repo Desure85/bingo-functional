@@ -13,12 +13,12 @@ use function Chemem\Bingo\Functional\Algorithms\constantFunction;
 
 class IO implements Monadic
 {
-    const of = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\IO::of';
+    const of = __CLASS__ . '::of';
 
     /**
      * @var callable The unsafe operation to perform
      */
-    private $operation;
+    private \Closure $operation;
 
     /**
      * IO monad constructor.
@@ -65,9 +65,7 @@ class IO implements Monadic
      */
     public function map(callable $function): Monadic
     {
-        return $this->bind(function ($operation) use ($function) {
-            return self::of($function($operation));
-        });
+        return $this->bind(fn($operation) => self::of($function($operation)));
     }
 
     /**
@@ -89,7 +87,7 @@ class IO implements Monadic
      */
     public function exec()
     {
-        return call_user_func($this->operation);
+        return ($this->operation)();
     }
 
     /**
@@ -101,6 +99,6 @@ class IO implements Monadic
      */
     public function flatMap(callable $function)
     {
-        return call_user_func($function, $this->exec());
+        return $function($this->exec());
     }
 }

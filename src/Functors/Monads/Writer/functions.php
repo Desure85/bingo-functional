@@ -65,9 +65,7 @@ const tell = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\Writer\\tell';
 
 function tell($msg): WriterMonad
 {
-    return new WriterMonad(function () use ($msg) {
-        return [null, [$msg]];
-    });
+    return new WriterMonad(fn(): array => [null, [$msg]]);
 }
 
 /**

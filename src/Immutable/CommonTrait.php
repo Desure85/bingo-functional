@@ -53,10 +53,7 @@ trait CommonTrait
         ) {
             $item = $list[$idx];
             $acc[] = is_array($item) ?
-                f\mapDeep(function ($val) use ($element): bool {
-
-                    return $val == $element;
-                }, $item) :
+                f\mapDeep(fn($val): bool => $val == $element, $item) :
                 $element == $item;
         }
 
@@ -130,10 +127,8 @@ trait CommonTrait
      */
     private static function checkContains(array $list): bool
     {
-        $comp = f\compose(f\flatten, function (array $val) {
-
-            return in_array(true, $val);
-        });
+        $comp = f\compose(f\flatten, f\partial('in_array', true));
+        
         return $comp($list);
     }
 }

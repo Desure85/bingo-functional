@@ -11,19 +11,19 @@ namespace Chemem\Bingo\Functional\Functors\Monads;
 
 class Reader implements Monadic
 {
-    const of = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\Reader::of';
+    const of = __CLASS__ . '::of';
 
     /**
      * @var callable The operation to use to lazily evaluate an environment variable
      */
-    private $action;
+    private \Closure $action;
 
     /**
      * Reader constructor.
      *
      * @param callable $action
      */
-    public function __construct($action)
+    public function __construct(callable $action)
     {
         $this->action = $action;
     }
@@ -39,9 +39,7 @@ class Reader implements Monadic
      */
     public static function of($action): self
     {
-        return is_callable($action) ? new static($action) : new static(function ($env) use ($action) {
-            return $action;
-        });
+        return is_callable($action) ? new static($action) : new static(fn($_) => $action);
     }
 
     /**
@@ -49,9 +47,7 @@ class Reader implements Monadic
      */
     public function ap(Monadic $app): Monadic
     {
-        return $this->bind(function ($func) use ($app) {
-            return $app->map($func);
-        });
+        return $this->bind(fn($func) => $app->map($func));
     }
 
     /**
@@ -63,9 +59,7 @@ class Reader implements Monadic
      */
     public function map(callable $function): Monadic
     {
-        return $this->bind(function ($env) use ($function) {
-            return self::of($function($env));
-        });
+        return $this->bind(fn($env) => self::of($function($env)));
     }
 
     /**
@@ -73,9 +67,7 @@ class Reader implements Monadic
      */
     public function bind(callable $function): Monadic
     {
-        return new self(function ($env) use ($function) {
-            return $function($this->run($env))->run($env);
-        });
+        return new self(fn($env) => $function($this->run($env))->run($env));
     }
 
     /**
@@ -97,6 +89,6 @@ class Reader implements Monadic
      */
     public function run($env)
     {
-        return call_user_func($this->action, $env);
+        return ($this->action)($env);
     }
 }

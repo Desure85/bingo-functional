@@ -13,12 +13,12 @@ use function Chemem\Bingo\Functional\Algorithms\extend;
 
 class Writer implements Monadic
 {
-    const of = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\Writer::of';
+    const of = __CLASS__ . '::of';
 
     /**
      * @var callable action
      */
-    private $action;
+    private \Closure $action;
 
     public function __construct(callable $action)
     {
@@ -37,9 +37,7 @@ class Writer implements Monadic
      */
     public static function of($result, $output): self
     {
-        return new static(function () use ($result, $output) {
-            return [$result, [$output]];
-        });
+        return new static(fn() => [$result, [$output]]);
     }
 
     /**
@@ -52,9 +50,7 @@ class Writer implements Monadic
      */
     public function ap(Monadic $app): Monadic
     {
-        return $this->bind(function ($function) use ($app) {
-            return $app->map($function);
-        });
+        return $this->bind(fn($function) => $app->map($function));
     }
 
     /**
@@ -112,6 +108,6 @@ class Writer implements Monadic
      */
     public function run(): array
     {
-        return call_user_func($this->action);
+        return ($this->action)();
     }
 }
