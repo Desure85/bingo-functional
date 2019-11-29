@@ -15,7 +15,5 @@ const flip = 'Chemem\\Bingo\\Functional\\Algorithms\\flip';
 
 function flip(callable $function)
 {
-    return function (...$args) use ($function) {
-        return $function(...array_reverse($args));
-    };
+    return fn(...$args) => $function(...array_reverse($args));
 }

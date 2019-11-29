@@ -15,9 +15,7 @@ const mean = 'Chemem\\Bingo\\Functional\\Algorithms\\mean';
 
 function mean(array $collection): float
 {
-    $divisor = fold(function ($acc, $val) {
-        return $val + $acc;
-    }, $collection, 0);
+    $divisor = fold(fn($acc, $val) => $val + $acc, $collection, 0);
 
     return $divisor / count($collection);
 }

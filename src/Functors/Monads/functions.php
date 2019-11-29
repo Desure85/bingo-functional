@@ -27,11 +27,11 @@ const mcompose = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\mcompose';
 
 function mcompose(callable $funcA, callable $funcB)
 {
-    return A\fold(function (callable $acc, callable $monadFn) {
-        return function ($val) use ($acc, $monadFn) {
-            return bind($acc, bind($monadFn, $val));
-        };
-    }, [$funcB], $funcA);
+    return A\fold(
+        fn(callable $acc, callable $func) => fn($val) => bind($acc, bind($func, $val)), 
+        [$funcB], 
+        $funcA
+    );
 }
 
 /**
@@ -49,9 +49,9 @@ const bind = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\bind';
 
 function bind(callable $function, Monadic $value = null): Monadic
 {
-    return A\curry(function ($function, $value) {
-        return $value->bind($function);
-    })(...func_get_args());
+    return A\curry(
+        fn($func, $value) => $value->bind($func)
+    )(...func_get_args());
 }
 
 /**
@@ -78,10 +78,10 @@ function foldM(callable $function, array $list, $acc): Monadic
         $tail = A\tail($collection);
         $head = A\head($collection);
 
-        return $function($acc, $head)->bind(function ($result) use ($tail, $fold) {
-            return $fold($result, $tail);
-        });
+        return $function($acc, $head)
+            ->bind(fn($result) => $fold($result, $tail));
     };
+
     return $fold($acc, $list);
 }
 
@@ -108,14 +108,14 @@ function filterM(callable $function, array $list): Monadic
         $tail = A\tail($collection);
         $head = A\head($collection);
 
-        return $function($head)->bind(function ($result) use ($tail, $monad, $head, $filter) {
-            return $filter($tail)->bind(function ($ret) use ($result, $head, $monad) {
-                if ($result) {
-                    array_unshift($ret, $head);
-                }
-                return $monad::of($ret);
-            });
-        });
+        return $function($head)
+            ->bind(fn($result) => $filter($tail)
+                ->bind(function ($ret) use ($result, $head, $monad) {
+                    if ($result) {
+                        array_unshift($ret, $head);
+                    }
+                    return $monad::of($ret);
+                }));
     };
 
     return $filter($list);

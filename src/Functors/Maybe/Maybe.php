@@ -9,17 +9,30 @@
 
 namespace Chemem\Bingo\Functional\Functors\Maybe;
 
+use \Chemem\Bingo\Functional\Algorithms as f;
 use \Chemem\Bingo\Functional\Functors\Monads as M;
 
 abstract class Maybe implements M\Monadic
 {
-    const just = 'Chemem\\Bingo\\Functional\\Functors\\Maybe\\Maybe::just';
+    /**
+     * @var string just 
+     */
+    const just      = __CLASS__ . '::just';
 
-    const nothing = 'Chemem\\Bingo\\Functional\\Functors\\Maybe\\Maybe::nothing';
+    /**
+     * @var string nothing 
+     */
+    const nothing   = __CLASS__ . '::nothing';
 
-    const fromValue = 'Chemem\\Bingo\\Functional\\Functors\\Maybe\\Maybe::fromValue';
+    /**
+     * @var string fromValue 
+     */
+    const fromValue = __CLASS__ . '::fromValue';
 
-    const lift = 'Chemem\\Bingo\\Functional\\Functors\\Maybe\\Maybe::lift';
+    /**
+     * @var string lift 
+     */
+    const lift      = __CLASS__ . '::lift';
     
     /**
      * just method.
@@ -67,18 +80,14 @@ abstract class Maybe implements M\Monadic
     {
         return function () use ($fn) {
             if (
-                array_reduce(
+                f\fold(
+                    fn(bool $status, Maybe $val) => $val->isNothing() ? false : $status,
                     func_get_args($fn),
-                    function ($status, Maybe $val) {
-                        return $val->isNothing() ? false : $status;
-                    },
                     true
                 )
             ) {
-                $args = array_map(
-                    function (Maybe $maybe) {
-                        return $maybe->getOrElse(null);
-                    },
+                $args = f\map(
+                    fn(Maybe $maybe) => $maybe->getOrElse(null),
                     func_get_args($fn)
                 );
 

@@ -15,9 +15,9 @@ namespace Chemem\Bingo\Functional\Common\Traits;
 trait TransientMutator
 {
     /**
-     * @var bool
+     * @var bool $mutable
      */
-    private $mutable = false;
+    private bool $mutable = false;
 
     /**
      * isMutable method.

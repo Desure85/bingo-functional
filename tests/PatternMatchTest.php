@@ -35,15 +35,9 @@ class PatternMatchTest extends TestCase
     {
         $match = PM\match(
             [
-                '(dividend:divisor:_)' => function (int $dividend, int $divisor) {
-                    return $dividend / $divisor;
-                },
-                '(dividend:_)' => function (int $dividend) {
-                    return $dividend / 2;
-                },
-                '_' => function () {
-                    return 1;
-                },
+                '(x:y:_)'   => fn(int $divd, int $divs) => $divd / $divs,
+                '(x:_)'     => fn($divd) => $divd / 2,
+                '_'         => fn() => 1,
             ]
         );
 
@@ -57,15 +51,9 @@ class PatternMatchTest extends TestCase
         $strings = A\partialLeft(
             PM\evalStringPattern,
             [
-                '"foo"' => function () {
-                    return 'foo';
-                },
-                '"bar"' => function () {
-                    return 'bar';
-                },
-                '_' => function () {
-                    return 'undefined';
-                },
+                '"foo"' => fn() => 'foo',
+                '"bar"' => fn() => 'bar',
+                '_'     => fn() => 'undefined',
             ]
         );
 
@@ -78,15 +66,9 @@ class PatternMatchTest extends TestCase
         $numbers = A\partialLeft(
             PM\evalStringPattern,
             [
-                '"1"' => function () {
-                    return 'first';
-                },
-                '"2"' => function () {
-                    return 'second';
-                },
-                '_' => function () {
-                    return 'undefined';
-                },
+                '"1"'   => fn() => 'first',
+                '"2"'   => fn() => 'second',
+                '_'     => fn() => 'undefined',
             ]
         );
 
@@ -99,15 +81,9 @@ class PatternMatchTest extends TestCase
         $patterns = A\partialLeft(
             PM\evalArrayPattern,
             [
-                '["foo", "bar", baz]' => function ($baz) {
-                    return strtoupper($baz);
-                },
-                '["foo", "bar"]' => function () {
-                    return 'foo-bar';
-                },
-                '_' => function () {
-                    return 'undefined';
-                },
+                '["foo", "bar", baz]'   => fn(string $baz) => strtoupper($baz),
+                '["foo", "bar"]'        => fn() => 'foo-bar',
+                '_'                     => fn() => 'undefined',
             ]
         );
 
@@ -120,17 +96,9 @@ class PatternMatchTest extends TestCase
     {
         $pattern = PM\patternMatch(
             [
-                '"foo"' => function () {
-                    $val = strtoupper('FOO');
-
-                    return $val;
-                },
-                '"12"' => function () {
-                    return 12 * 12;
-                },
-                '_' => function () {
-                    return 'undefined';
-                },
+                '"foo"' => fn() => strtoupper('foo'),
+                '"12"'  => fn() => pow(12, 2),
+                '_'     => fn() => 'undefined',
             ],
             'foo'
         );
@@ -142,19 +110,9 @@ class PatternMatchTest extends TestCase
     {
         $pattern = PM\patternMatch(
             [
-                '["foo", "bar"]' => function () {
-                    $val = strtoupper('foo-bar');
-
-                    return $val;
-                },
-                '["foo", "bar", baz]' => function ($baz) {
-                    $val = lcfirst(strtoupper($baz));
-
-                    return $val;
-                },
-                '_' => function () {
-                    return 'undefined';
-                },
+                '["foo", "bar"]'        => fn() => strtoupper('foo-bar'),
+                '["foo", "bar", baz]'   => fn(string $baz) => lcfirst(strtoupper($baz)),
+                '_'                     => fn() => 'undefined',
             ],
             explode('/', 'foo/bar/functional')
         );
@@ -166,19 +124,11 @@ class PatternMatchTest extends TestCase
     {
         $evalObject = PM\evalObjectPattern(
             [
-                IO::class => function () {
-                    return 'IO monad';
-                },
-                State::class => function () {
-                    return 'State monad';
-                },
-                '_' => function () {
-                    return 'NaN';
-                },
+                IO::class       => fn() => 'IO monad',
+                State::class    => fn() =>'State monad',
+                '_'             => fn() =>'NaN',
             ],
-            IO::of(function () {
-                return 12;
-            })
+            IO::of(fn() => 12)
         );
 
         $this->assertEquals('IO monad', $evalObject);
@@ -188,12 +138,8 @@ class PatternMatchTest extends TestCase
     {
         $pattern = PM\evalArrayPattern(
             [
-                '[_, "chemem"]' => function () {
-                    return 'chemem';
-                },
-                '_' => function () {
-                    return 'don\'t care';
-                },
+                '[_, "chemem"]' => fn() => 'chemem',
+                '_'             => fn() => 'don\'t care',
             ],
             ['func', 'chemem']
         );
@@ -205,12 +151,8 @@ class PatternMatchTest extends TestCase
     {
         $result = PM\evalArrayPattern(
             [
-                '["ask", _, "mike"]' => function () {
-                    return 'G.O.A.T';
-                },
-                '_' => function () {
-                    return 'not the greatest';
-                },
+                '["ask", _, "mike"]'    => fn() => 'G.O.A.T',
+                '_'                     => fn() => 'not the greatest',
             ],
             ['ask', 'uncle', 'mike']
         );
@@ -232,9 +174,11 @@ class PatternMatchTest extends TestCase
 
     public function testLetInFunctionAcceptsWildcardParameters()
     {
-        $letIn = self::letInFunc(['a', '_', '_', 'b'], ['a', 'b'], function ($a, $b) {
-            return $a + $b;
-        });
+        $letIn = self::letInFunc(
+            ['a', '_', '_', 'b'], 
+            ['a', 'b'], 
+            fn($a, $b) => $a + $b
+        );
 
         $this->assertEquals(5, $letIn);
         $this->assertInternalType('integer', $letIn);

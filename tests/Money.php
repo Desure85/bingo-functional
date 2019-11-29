@@ -24,7 +24,7 @@ class Money
 {
     use Transient;
 
-    private $value;
+    private float $value;
 
     public function __construct(float $value)
     {

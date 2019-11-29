@@ -9,15 +9,27 @@
 
 namespace Chemem\Bingo\Functional\Functors\Either;
 
-use \Chemem\Bingo\Functional\Functors\Monads as M;
+use \Chemem\Bingo\Functional\{
+    Algorithms as f,
+    Functors\Monads as M
+};
 
 abstract class Either implements M\Monadic
 {
-    const left = 'Chemem\\Bingo\\Functional\\Functors\\Either\\Either::left';
+    /**
+     * @var string left
+     */
+    const left  = __CLASS__ . '::left';
 
-    const right = 'Chemem\\Bingo\\Functional\\Functors\\Either\\Either::right';
+    /**
+     * @var string right
+     */
+    const right = __CLASS__ . '::right';
 
-    const lift = 'Chemem\\Bingo\\Functional\\Functors\\Either\\Either::lift';
+    /**
+     * @var string lift
+     */
+    const lift  = __CLASS__ . '::lift';
     /**
      * left method.
      *
@@ -54,24 +66,18 @@ abstract class Either implements M\Monadic
     {
         return function () use ($function, $left) {
             if (
-                array_reduce(
+                f\fold(
+                    fn(bool $status, Either $val) => $val->isLeft() ? false : $status,
                     func_get_args($function),
-                    function (bool $status, Either $val) {
-                        return $val->isLeft() ? false : $status;
-                    },
                     true
                 )
             ) {
-                $args = array_map(
-                    function (Either $either) {
-                        return $either
-                            ->orElse(Either::right(null))
-                            ->getRight();
-                    },
+                $args = f\map(
+                    fn(Either $either) => $either->orElse(Either::right(null))->getRight(),
                     func_get_args()
                 );
 
-                return self::right(call_user_func($function, ...$args));
+                return self::right($function(...$args));
             }
 
             return $left;

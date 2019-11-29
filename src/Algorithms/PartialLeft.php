@@ -15,7 +15,7 @@ const partialLeft = 'Chemem\\Bingo\\Functional\\Algorithms\\partialLeft';
 
 function partialLeft(callable $fn, ...$args): callable
 {
-    return fn(...$inner) => call_user_func_array($fn, array_merge($args, $inner));
+    return fn(...$inner) => $fn(...array_merge($args, $inner));
 }
 
 const partial = 'Chemem\\Bingo\\Functional\\Algorithms\\partial';

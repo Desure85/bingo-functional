@@ -15,15 +15,9 @@ const every = 'Chemem\\Bingo\\Functional\\Algorithms\\every';
 
 function every(array $collection, callable $func): bool
 {
-    $valCount = count($collection);
-
     $everyFn = compose(
         partialLeft(filter, $func),
-        function (array $result) use ($valCount) {
-            $resCount = count($result);
-
-            return $resCount == $valCount;
-        }
+        fn(array $result): bool => count($result) == count($collection)
     );
 
     return $everyFn($collection);

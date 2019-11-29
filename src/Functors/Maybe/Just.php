@@ -13,7 +13,7 @@ use \Chemem\Bingo\Functional\Functors\Monads as M;
 
 class Just extends Maybe
 {
-    const of = 'Chemem\\Bingo\\Functional\\Functors\\Maybe\\Just::of';
+    const of = __CLASS__ . '::of';
 
     private $value;
 

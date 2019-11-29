@@ -23,19 +23,13 @@ const match = 'Chemem\\Bingo\\Functional\\PatternMatching\\match';
 
 function match(array $options): callable
 {
-    $matchFn = function (array $options): array {
-        return array_key_exists('_', $options) ?
-            $options :
-            ['_' => function () {
-                return false;
-            }];
-    };
+    $matchFn = fn(array $options): array => array_key_exists('_', $options) ? $options : [
+        '_' => fn() => false
+    ];
 
     $conditionGen = A\compose(
         $matchFn,
-        A\partialRight('array_filter', function ($value) {
-            return is_callable($value);
-        }),
+        A\partialRight('array_filter', 'is_callable'),
         'array_keys',
         getNumConditions
     );
@@ -45,9 +39,7 @@ function match(array $options): callable
 
         $check = A\compose(
             $conditionGen,
-            A\partialLeft(A\filter, function (int $count) use ($valCount) {
-                return $count == $valCount;
-            }),
+            A\partialLeft(A\filter, fn(int $count): bool => $count == $valCount),
             A\head
         );
 
@@ -71,9 +63,7 @@ const getNumConditions = 'Chemem\\Bingo\\Functional\\PatternMatching\\getNumCond
 
 function getNumConditions(array $conditions)
 {
-    $checkOpt = function (string $opt): string {
-        return preg_match('/([_])+/', $opt) ? $opt : '_';
-    };
+    $checkOpt = fn($opt) => preg_match('/([_])+/', $opt) ? $opt : '_';
 
     $extr = A\map(
         function (string $condition) use ($checkOpt) {
@@ -81,9 +71,7 @@ function getNumConditions(array $conditions)
                 $checkOpt,
                 A\partialLeft('preg_replace', '/([(\)])+/', ''),
                 A\partialLeft('explode', ':'),
-                A\partialLeft(A\filter, function ($val) {
-                    return $val !== '_';
-                }),
+                A\partialLeft(A\filter, fn($val) => $val !== '_'),
                 'count'
             );
 
@@ -140,37 +128,28 @@ function evalArrayPattern(array $patterns, array $comp)
 {
     $evaluate = A\compose(
         'array_keys',
-        function (array $pttnKeys) {
-            $filter = A\partialLeft(A\filter, function ($pattern) {
-                return substr($pattern, 0, 1) == '[' && substr($pattern, -1) == ']';
-            });
-
-            return $filter($pttnKeys);
-        },
+        A\partial(A\filter, fn($pattern): bool => substr($pattern, 0, 1) == '[' && substr($pattern, -1) == ']'),
         function (array $pttnKeys) {
             $extract = A\compose(
                 A\partialLeft('str_replace', '[', ''),
                 A\partialLeft('str_replace', ']', ''),
                 A\partialLeft('str_replace', ' ', ''),
                 A\partialLeft('explode', ', '),
-                function (array $tokens) {
-                    return array_merge(...array_map(function ($token) {
-                        return A\fold(function ($acc, $tkn) {
-                            $acc[] = preg_match('/[\"]+/', $tkn) ? A\concat('*', '', str_replace('"', '', $tkn)) : $tkn;
+                fn(array $tokens) => array_merge(...array_map(fn($token) => A\fold(function ($acc, $tkn) {
+                    $acc[] = preg_match('/[\"]+/', $tkn) ? A\concat('*', '', str_replace('"', '', $tkn)) : $tkn;
 
-                            return $acc;
-                        }, explode(',', $token), []);
-                    }, $tokens));
-                }
+                    return $acc;
+                }, explode(',', $token), []), $tokens))
             );
 
             return array_combine($pttnKeys, A\map($extract, $pttnKeys));
         },
         function (array $patterns) use ($comp) {
             $cmpCount = count($comp);
-            $filter = A\partialRight('array_filter', function ($pttn) use ($cmpCount) {
-                return count($pttn) == $cmpCount;
-            });
+            $filter = A\partialRight(
+                'array_filter', 
+                fn($pttn): bool => count($pttn) == $cmpCount
+            );
 
             return $filter($patterns);
         },
@@ -178,9 +157,7 @@ function evalArrayPattern(array $patterns, array $comp)
             $compLen = count($comp);
 
             $list = array_map(function ($pttns) use ($comp, $compLen) {
-                $keys = array_map(function ($key) {
-                    return str_replace('*', '', $key);
-                }, $pttns);
+                $keys = array_map(A\partial('str_replace', '*', ''), $pttns);
 
                 $intersect = array_intersect_assoc($keys, $comp);
 
@@ -192,9 +169,7 @@ function evalArrayPattern(array $patterns, array $comp)
         function (array $patterns) use ($comp) {
             return array_filter($patterns, function ($pttn) use ($comp) {
                 $raw = A\dropRight(array_values($pttn), 1);
-                $keys = array_map(function ($tkn) {
-                    return str_replace('*', '', $tkn);
-                }, $raw);
+                $keys = array_map(A\partial('str_replace', '*', ''), $raw);
 
                 return !empty($pttn['intersect']) && in_array('_', $keys) && end($keys) == end($comp) ||
                     !empty($pttn['intersect']) && !preg_match('/[\*\_]+/', end($raw)) ||
@@ -235,35 +210,24 @@ function evalStringPattern(array $patterns, string $value)
 {
     $evalPattern = A\compose(
         'array_keys',
-        A\partialLeft(A\filter, function ($val) {
-            return is_string($val) && preg_match('/([\"]+)/', $val);
-        }),
-        A\partialLeft(
-            A\map,
-            function ($val) use ($value) {
-                $evaluate = A\compose(
-                    A\partialLeft('str_replace', '"', ''),
-                    function ($val) {
-                        $valType = gettype($val);
+        A\partialLeft(A\filter, fn($val): bool => is_string($val) && preg_match('/([\"]+)/', $val)),
+        A\partialLeft(A\map, function ($val) use ($value) {
+            $evaluate = A\compose(
+                A\partialLeft('str_replace', '"', ''),
+                function ($val) {
+                    $valType = gettype($val);
 
-                        return $valType == 'integer' ?
-                            (int) $val :
-                            ($valType == 'double' ? (float) $val : $val);
-                    },
-                    function ($val) use ($value) {
-                        return $val == $value ? A\concat('"', '', $val, '') : '_';
-                    }
-                );
+                    return $valType == 'integer' ?
+                        (int) $val :
+                        ($valType == 'double' ? (float) $val : $val);
+                },
+                fn($val) => $val == $value ? A\concat('"', '', $val, '') : '_'
+            );
 
-                return $evaluate($val);
-            }
-        ),
-        A\partialLeft(A\filter, function ($val) {
-            return $val !== '_';
+            return $evaluate($val);
         }),
-        function ($match) {
-            return !empty($match) ? A\head($match) : '_';
-        },
+        A\partialLeft(A\filter, fn($val): bool => $val !== '_'),
+        fn($match) => !empty($match) ? A\head($match) : '_',
         function ($match) use ($patterns) {
             $valType = A\compose('array_values', A\isArrayOf)($patterns);
 
@@ -294,21 +258,11 @@ function evalObjectPattern(array $patterns, $value)
 
     $eval = A\compose(
         'array_keys',
-        A\partialLeft(A\filter, function ($val) {
-            return is_string($val) && preg_match('/([a-zA-Z]+)/', $val);
-        }),
-        A\partialLeft(A\filter, function ($classStr) use ($valObj) {
-            return class_exists($classStr) && $classStr == $valObj;
-        }),
+        A\partialLeft(A\filter, fn($val): bool => is_string($val) && preg_match('/([a-zA-Z]+)/', $val)),
+        A\partialLeft(A\filter, fn($classStr): bool => class_exists($classStr) && $classStr == $valObj),
         A\head,
-        function (string $match) {
-            return !empty($match) && !is_null($match) ? A\identity($match) : A\identity('_');
-        },
-        function (string $key) use ($patterns) {
-            $func = $key == '_' ? isset($patterns['_']) ? A\identity($patterns['_']) : constantFunction(false) : A\identity($patterns[$key]);
-
-            return call_user_func($func);
-        }
+        fn(string $match) => !empty($match) && !is_null($match) ? A\identity($match) : A\identity('_'),
+        fn(string $key) => call_user_func($key == '_' ? isset($patterns['_']) ? A\identity($patterns['_']) : constantFunction(false) : A\identity($patterns[$key]))
     );
 
     return $eval($patterns);
@@ -335,16 +289,14 @@ function letIn(array $params, array $list): callable
         }
         
         return [
-            is_null($param) ? '_' : '"' . $param . '"' => function () use ($acc, $val, $param) {
-                return !is_null($param) ? $val : $acc;
-            }
+            is_null($param) ? 
+                '_' : 
+                '"' . $param . '"' => fn() => !is_null($param) ? $val : $acc
         ];
     }, $params, $list));
 
     return function (array $params, callable $function) use ($patterns) {
-        $values = A\map(function ($param) use ($patterns) {
-            return patternMatch($patterns, $param);
-        }, $params);
+        $values = A\map(A\partial(patternMatch, $patterns), $params);
         
         return $function(...$values);
     };
