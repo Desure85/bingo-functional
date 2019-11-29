@@ -2,6 +2,9 @@
 
 /**
  * TransientMutator trait.
+ * Adapted from an article written by Edd Man
+ *
+ * @see https://tech.mybuilder.com/designing-immutable-concepts-with-transient-mutation-in-php/
  *
  * @author Lochemem Bruno Michael
  * @license Apache 2.0
