@@ -15,22 +15,22 @@ use \Chemem\Bingo\Functional\Functors\Monads as M;
 abstract class Maybe implements M\Monadic
 {
     /**
-     * @var string just 
+     * @var string just
      */
     const just      = __CLASS__ . '::just';
 
     /**
-     * @var string nothing 
+     * @var string nothing
      */
     const nothing   = __CLASS__ . '::nothing';
 
     /**
-     * @var string fromValue 
+     * @var string fromValue
      */
     const fromValue = __CLASS__ . '::fromValue';
 
     /**
-     * @var string lift 
+     * @var string lift
      */
     const lift      = __CLASS__ . '::lift';
     

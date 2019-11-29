@@ -60,7 +60,10 @@ class ListMonad implements Monadic
 
                 return $app();
             }),
-            fn($result) => f\extend($list, ...$result)
+            fn($result) => f\extend(
+                $list,
+            ...$result
+            )
         );
 
         return new static($result($app->extract()));
@@ -76,11 +79,15 @@ class ListMonad implements Monadic
     public function bind(callable $function): Monadic
     {
         $concat = f\compose(
-            fn(array $list) => f\fold(function ($acc, $item) use ($function) {
+            fn(array $list) => f\fold(function (
+                $acc,
+                $item
+            ) use ($function) {
                 $acc[] = $function($item)->extract();
-
                 return $acc;
-            }, $list, []),
+            },
+            $list,
+            []),
             f\partial('array_merge', $this->collection)
         );
 

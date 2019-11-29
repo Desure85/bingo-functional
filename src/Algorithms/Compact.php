@@ -16,7 +16,7 @@ const compact = 'Chemem\\Bingo\\Functional\\Algorithms\\compact';
 function compact(array $collection): array
 {
     return filter(
-        fn($val): bool => !is_bool($val) && !is_null($val), 
+        fn($val): bool => !is_bool($val) && !is_null($val),
         $collection
     );
 }

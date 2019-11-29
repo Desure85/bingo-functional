@@ -125,8 +125,8 @@ class PatternMatchTest extends TestCase
         $evalObject = PM\evalObjectPattern(
             [
                 IO::class       => fn() => 'IO monad',
-                State::class    => fn() =>'State monad',
-                '_'             => fn() =>'NaN',
+                State::class    => fn() => 'State monad',
+                '_'             => fn() => 'NaN',
             ],
             IO::of(fn() => 12)
         );
@@ -175,8 +175,8 @@ class PatternMatchTest extends TestCase
     public function testLetInFunctionAcceptsWildcardParameters()
     {
         $letIn = self::letInFunc(
-            ['a', '_', '_', 'b'], 
-            ['a', 'b'], 
+            ['a', '_', '_', 'b'],
+            ['a', 'b'],
             fn($a, $b) => $a + $b
         );
 

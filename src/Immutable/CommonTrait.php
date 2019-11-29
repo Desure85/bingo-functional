@@ -53,7 +53,7 @@ trait CommonTrait
         ) {
             $item = $list[$idx];
             $acc[] = is_array($item) ?
-                f\mapDeep(fn($val): bool => $val == $element, $item) :
+                f\mapDeep(fn($val) : bool => $val == $element, $item) :
                 $element == $item;
         }
 

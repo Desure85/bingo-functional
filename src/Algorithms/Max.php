@@ -16,8 +16,8 @@ const max = 'Chemem\\Bingo\\Functional\\Algorithms\\max';
 function max(array $collection): float
 {
     return fold(
-        fn(float $acc, float $val) => $val > $acc ? $val : $acc, 
-        $collection, 
+        fn(float $acc, float $val) => $val > $acc ? $val : $acc,
+        $collection,
         0.0
     );
 }

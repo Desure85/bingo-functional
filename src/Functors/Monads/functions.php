@@ -28,8 +28,11 @@ const mcompose = 'Chemem\\Bingo\\Functional\\Functors\\Monads\\mcompose';
 function mcompose(callable $funcA, callable $funcB)
 {
     return A\fold(
-        fn(callable $acc, callable $func) => fn($val) => bind($acc, bind($func, $val)), 
-        [$funcB], 
+        fn(callable $acc, callable $func) => fn($val) => bind(
+            $acc,
+        bind($func, $val)
+        ),
+        [$funcB],
         $funcA
     );
 }

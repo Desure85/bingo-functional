@@ -135,11 +135,16 @@ function evalArrayPattern(array $patterns, array $comp)
                 A\partialLeft('str_replace', ']', ''),
                 A\partialLeft('str_replace', ' ', ''),
                 A\partialLeft('explode', ', '),
-                fn(array $tokens) => array_merge(...array_map(fn($token) => A\fold(function ($acc, $tkn) {
+                fn(array $tokens) => array_merge(...array_map(fn($token) => A\fold(function (
+                    $acc,
+                $tkn
+                ) {
                     $acc[] = preg_match('/[\"]+/', $tkn) ? A\concat('*', '', str_replace('"', '', $tkn)) : $tkn;
-
                     return $acc;
-                }, explode(',', $token), []), $tokens))
+                },
+                explode(',', $token),
+                []),
+                $tokens))
             );
 
             return array_combine($pttnKeys, A\map($extract, $pttnKeys));
@@ -147,7 +152,7 @@ function evalArrayPattern(array $patterns, array $comp)
         function (array $patterns) use ($comp) {
             $cmpCount = count($comp);
             $filter = A\partialRight(
-                'array_filter', 
+                'array_filter',
                 fn($pttn): bool => count($pttn) == $cmpCount
             );
 
@@ -221,7 +226,12 @@ function evalStringPattern(array $patterns, string $value)
                         (int) $val :
                         ($valType == 'double' ? (float) $val : $val);
                 },
-                fn($val) => $val == $value ? A\concat('"', '', $val, '') : '_'
+                fn($val) => $val == $value ? A\concat(
+                '"',
+                '',
+                $val,
+                    ''
+                ) : '_'
             );
 
             return $evaluate($val);
@@ -289,8 +299,8 @@ function letIn(array $params, array $list): callable
         }
         
         return [
-            is_null($param) ? 
-                '_' : 
+            is_null($param) ?
+                '_' :
                 '"' . $param . '"' => fn() => !is_null($param) ? $val : $acc
         ];
     }, $params, $list));

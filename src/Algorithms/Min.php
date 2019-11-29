@@ -16,8 +16,8 @@ const min = 'Chemem\\Bingo\\Functional\\Algorithms\\min';
 function min(array $collection): float
 {
     return fold(
-        fn(float $acc, float $val) => $val < $acc ? $val : $acc, 
-        $collection, 
+        fn(float $acc, float $val) => $val < $acc ? $val : $acc,
+        $collection,
         head($collection)
     );
 }
