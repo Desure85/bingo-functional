@@ -101,9 +101,7 @@ const patternMatch = 'Chemem\\Bingo\\Functional\\PatternMatching\\patternMatch';
 function patternMatch(array $patterns, $value)
 {
     $matches = Maybe\Maybe::just($value)
-        ->filter(function ($value) {
-            return !empty($value) || !isset($value);
-        });
+        ->filter(fn($value): bool => !empty($value) || !isset($value));
 
     return Maybe\maybe(
         key_exists('_', $patterns) ? ($patterns['_'])() : false, 
