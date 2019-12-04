@@ -226,12 +226,13 @@ function evalStringPattern(array $patterns, string $value)
                         (int) $val :
                         ($valType == 'double' ? (float) $val : $val);
                 },
-                fn($val) => $val == $value ? A\concat(
-                '"',
-                '',
-                $val,
-                    ''
-                ) : '_'
+                function ($val) use ($value) {
+                    if (empty($value)) {
+                        return '_';
+                    }
+
+                    return $val == $value ? A\concat('"', '', $val, '') : '_';
+                }
             );
 
             return $evaluate($val);
